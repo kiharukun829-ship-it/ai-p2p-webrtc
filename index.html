@@ -1,0 +1,2498 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jiffy P2P</title>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+html,body{
+    margin:0;
+    padding:0;
+    width:100%;
+    min-height:100%;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:#f5f7fb;
+    color:#18202a;
+}
+
+body{
+    padding:20px;
+}
+
+.app{
+    max-width:720px;
+    margin:0 auto;
+}
+
+.card{
+    background:#fff;
+    border:1px solid #dfe5ed;
+    border-radius:18px;
+    padding:22px;
+    margin-bottom:16px;
+    box-shadow:0 5px 20px rgba(0,0,0,.06);
+}
+
+h1{
+    margin:0 0 6px;
+    font-size:30px;
+}
+
+h2{
+    margin:0 0 12px;
+    font-size:22px;
+}
+
+h3{
+    margin:18px 0 8px;
+}
+
+.sub{
+    color:#697586;
+    margin-bottom:20px;
+}
+
+button{
+    border:0;
+    border-radius:12px;
+    padding:13px 18px;
+    margin:5px;
+    background:#1677ff;
+    color:#fff;
+    font-size:15px;
+    cursor:pointer;
+}
+
+button:hover{
+    opacity:.9;
+}
+
+button.secondary{
+    background:#e8edf5;
+    color:#18202a;
+}
+
+button.danger{
+    background:#e53935;
+}
+
+button.green{
+    background:#19a463;
+}
+
+button.big{
+    width:100%;
+    padding:17px;
+    font-size:17px;
+}
+
+.mode-grid,
+.role-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+}
+
+.role-grid{
+    grid-template-columns:1fr 1fr;
+}
+
+.mode-btn,
+.role-btn{
+    margin:0;
+    min-height:75px;
+    background:#f0f4f9;
+    color:#18202a;
+    border:2px solid transparent;
+}
+
+.mode-btn.selected,
+.role-btn.selected{
+    border-color:#1677ff;
+    background:#e8f1ff;
+}
+
+.mode-btn strong,
+.role-btn strong{
+    display:block;
+    font-size:16px;
+}
+
+.mode-btn span,
+.role-btn span{
+    display:block;
+    margin-top:5px;
+    font-size:12px;
+    color:#667085;
+}
+
+.hidden{
+    display:none !important;
+}
+
+.step{
+    border-left:4px solid #1677ff;
+    padding:10px 14px;
+    margin:12px 0;
+    background:#f7faff;
+}
+
+.status{
+    padding:12px;
+    border-radius:10px;
+    background:#f0f3f7;
+    margin:10px 0;
+    white-space:pre-wrap;
+    word-break:break-word;
+}
+
+.status.ok{
+    background:#e8f8ef;
+    color:#08783e;
+}
+
+.status.error{
+    background:#fff0f0;
+    color:#b42318;
+}
+
+textarea{
+    width:100%;
+    min-height:150px;
+    resize:vertical;
+    border:1px solid #ccd5e0;
+    border-radius:12px;
+    padding:12px;
+    font-family:monospace;
+    font-size:12px;
+}
+
+.small{
+    font-size:12px;
+    color:#667085;
+}
+
+.qr-wrap{
+    text-align:center;
+    margin:15px 0;
+}
+
+.qr{
+    display:inline-block;
+    padding:10px;
+    background:#fff;
+    border-radius:10px;
+    border:1px solid #ddd;
+}
+
+.qr-page{
+    margin-top:10px;
+    font-size:13px;
+}
+
+.video-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+
+video{
+    width:100%;
+    background:#111;
+    border-radius:14px;
+    aspect-ratio:4/3;
+    object-fit:cover;
+}
+
+.video-label{
+    margin:5px 0;
+    font-size:12px;
+    color:#667085;
+}
+
+.chat{
+    height:330px;
+    overflow:auto;
+    background:#f4f6f9;
+    border-radius:14px;
+    padding:12px;
+}
+
+.msg{
+    margin:7px 0;
+    max-width:80%;
+    padding:9px 12px;
+    border-radius:12px;
+    word-break:break-word;
+}
+
+.msg.me{
+    margin-left:auto;
+    background:#1677ff;
+    color:white;
+}
+
+.msg.other{
+    background:white;
+    border:1px solid #dde3ea;
+}
+
+.chat-input{
+    display:flex;
+    gap:8px;
+    margin-top:10px;
+}
+
+.chat-input input{
+    flex:1;
+    min-width:0;
+    border:1px solid #ccd5e0;
+    border-radius:12px;
+    padding:12px;
+    font-size:15px;
+}
+
+.controls{
+    text-align:center;
+}
+
+.scan-box{
+    text-align:center;
+}
+
+#scanVideo,
+#answerScanVideo{
+    width:100%;
+    max-width:480px;
+    background:#000;
+    border-radius:15px;
+    aspect-ratio:4/3;
+    object-fit:cover;
+}
+
+.divider{
+    text-align:center;
+    margin:16px 0;
+    color:#8993a3;
+    font-size:13px;
+}
+
+.mode-info{
+    padding:10px;
+    background:#f7f9fc;
+    border-radius:10px;
+    font-size:13px;
+    margin-bottom:15px;
+}
+
+@media(max-width:600px){
+    body{
+        padding:10px;
+    }
+
+    .card{
+        padding:16px;
+        border-radius:14px;
+    }
+
+    .mode-grid{
+        grid-template-columns:1fr;
+    }
+
+    .video-grid{
+        grid-template-columns:1fr;
+    }
+
+    h1{
+        font-size:25px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<!-- =========================
+     MODE SELECT
+========================= -->
+
+<section id="modeScreen" class="card">
+
+    <h1>Jiffy</h1>
+    <div class="sub">1対1 P2P communication</div>
+
+    <div class="mode-info">
+        通信モードを選択してください。
+    </div>
+
+    <div class="mode-grid">
+
+        <button class="mode-btn selected" data-mode="video"
+                onclick="selectMode('video')">
+            <strong>📹 Video</strong>
+            <span>映像 + 音声</span>
+        </button>
+
+        <button class="mode-btn" data-mode="text"
+                onclick="selectMode('text')">
+            <strong>💬 Text</strong>
+            <span>テキストのみ</span>
+        </button>
+
+        <button class="mode-btn" data-mode="full"
+                onclick="selectMode('full')">
+            <strong>📹💬 Full</strong>
+            <span>映像 + 音声 + チャット</span>
+        </button>
+
+    </div>
+
+    <button class="big" onclick="goRoleSelect()">
+        はじめる
+    </button>
+
+</section>
+
+
+<!-- =========================
+     ROLE SELECT
+========================= -->
+
+<section id="roleScreen" class="card hidden">
+
+    <h2>どうする？</h2>
+
+    <div id="roleModeInfo" class="mode-info"></div>
+
+    <div class="role-grid">
+
+        <button id="offerRoleBtn"
+                class="role-btn"
+                onclick="chooseRole('offer')">
+            <strong>📤 SDPを作る</strong>
+            <span>自分から接続を開始</span>
+        </button>
+
+        <button id="answerRoleBtn"
+                class="role-btn"
+                onclick="chooseRole('answer')">
+            <strong>📥 SDPを受け取る</strong>
+            <span>相手から接続を受ける</span>
+        </button>
+
+    </div>
+
+    <button class="secondary big" onclick="backToMode()">
+        戻る
+    </button>
+
+</section>
+
+
+<!-- =========================
+     SIGNALING
+========================= -->
+
+<section id="signalScreen" class="card hidden">
+
+    <h2 id="signalTitle">接続準備</h2>
+
+    <div id="signalStatus" class="status">
+        準備しています...
+    </div>
+
+
+    <!-- OFFER SIDE -->
+
+    <div id="offerPanel" class="hidden">
+
+        <div class="step">
+            <strong>① SDPを作成</strong><br>
+            下のボタンを押して接続用SDPを作ります。
+        </div>
+
+        <button class="big" onclick="createOffer()">
+            SDPを作成
+        </button>
+
+        <div id="offerResult" class="hidden">
+
+            <div class="step">
+                <strong>② 相手にこのSDPを送る</strong><br>
+                QRを読み取ってもらうか、Base64をコピーしてください。
+            </div>
+
+            <div class="qr-wrap">
+                <div id="offerQR" class="qr"></div>
+                <div id="offerQRPage" class="qr-page"></div>
+            </div>
+
+            <div>
+                <button class="secondary" onclick="prevOfferQR()">
+                    ← 前
+                </button>
+
+                <button class="secondary" onclick="nextOfferQR()">
+                    次 →
+                </button>
+            </div>
+
+            <button class="secondary" onclick="copyOfferBase64()">
+                Base64をコピー
+            </button>
+
+            <details>
+                <summary>生SDP / Base64を表示</summary>
+
+                <h3>生SDP</h3>
+                <textarea id="offerRaw" readonly></textarea>
+
+                <button class="secondary" onclick="copyText('offerRaw')">
+                    生SDPをコピー
+                </button>
+
+                <h3>Base64</h3>
+                <textarea id="offerBase64" readonly></textarea>
+            </details>
+
+            <div class="step">
+                <strong>③ Answerを待っています</strong><br>
+                相手がAnswerを作成したら、下から入力してください。
+            </div>
+
+            <div class="scan-box">
+
+                <button class="green"
+                        onclick="startAnswerScanner()">
+                    📷 Answer QRを読み取る
+                </button>
+
+                <button class="secondary"
+                        onclick="stopAnswerScanner()">
+                    カメラ停止
+                </button>
+
+                <video id="answerScanVideo"
+                       class="hidden"
+                       autoplay
+                       muted
+                       playsinline></video>
+
+            </div>
+
+            <div class="divider">
+                または Base64を貼り付け
+            </div>
+
+            <textarea id="answerInput"
+                      placeholder="相手から受け取ったAnswerのBase64"></textarea>
+
+            <button class="big"
+                    onclick="applyAnswerFromInput()">
+                Answerを適用
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- ANSWER SIDE -->
+
+    <div id="answerPanel" class="hidden">
+
+        <div class="step">
+            <strong>① 相手のSDPを読み取る</strong><br>
+            相手が表示したQRをカメラで読み取ってください。
+        </div>
+
+        <div class="scan-box">
+
+            <button class="green"
+                    onclick="startOfferScanner()">
+                📷 Offer QRを読み取る
+            </button>
+
+            <button class="secondary"
+                    onclick="stopOfferScanner()">
+                カメラ停止
+            </button>
+
+            <video id="scanVideo"
+                   class="hidden"
+                   autoplay
+                   muted
+                   playsinline></video>
+
+        </div>
+
+        <div class="divider">
+            または Base64を貼り付け
+        </div>
+
+        <textarea id="offerInput"
+                  placeholder="相手から受け取ったOfferのBase64"></textarea>
+
+        <button class="big"
+                onclick="acceptOfferFromInput()">
+            Offerを受け取る
+        </button>
+
+
+        <div id="answerResult" class="hidden">
+
+            <div class="step">
+                <strong>② Answerができました</strong><br>
+                このQRをOfferを作った人に見せてください。
+            </div>
+
+            <div class="qr-wrap">
+                <div id="answerQR" class="qr"></div>
+                <div id="answerQRPage" class="qr-page"></div>
+            </div>
+
+            <div>
+                <button class="secondary" onclick="prevAnswerQR()">
+                    ← 前
+                </button>
+
+                <button class="secondary" onclick="nextAnswerQR()">
+                    次 →
+                </button>
+            </div>
+
+            <button class="secondary" onclick="copyAnswerBase64()">
+                Base64をコピー
+            </button>
+
+            <details>
+                <summary>生SDP / Base64を表示</summary>
+
+                <h3>生SDP</h3>
+                <textarea id="answerRaw" readonly></textarea>
+
+                <button class="secondary" onclick="copyText('answerRaw')">
+                    生SDPをコピー
+                </button>
+
+                <h3>Base64</h3>
+                <textarea id="answerBase64" readonly></textarea>
+            </details>
+
+            <div id="answerWait"
+                 class="status">
+                Answerを相手に渡してください。
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================
+     CALL SCREEN
+========================= -->
+
+<section id="callScreen" class="card hidden">
+
+    <h2 id="callTitle">接続中</h2>
+
+    <div id="connectionStatus"
+         class="status">
+        接続しています...
+    </div>
+
+
+    <!-- VIDEO -->
+
+    <div id="videoArea" class="hidden">
+
+        <div class="video-grid">
+
+            <div>
+                <div class="video-label">相手</div>
+                <video id="remoteVideo"
+                       autoplay
+                       playsinline></video>
+            </div>
+
+            <div>
+                <div class="video-label">自分</div>
+                <video id="localVideo"
+                       autoplay
+                       muted
+                       playsinline></video>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- CHAT -->
+
+    <div id="chatArea" class="hidden">
+
+        <h3>チャット</h3>
+
+        <div id="chat"
+             class="chat"></div>
+
+        <div class="chat-input">
+
+            <input id="chatInput"
+                   type="text"
+                   placeholder="メッセージ..."
+                   onkeydown="if(event.key==='Enter')sendChat()">
+
+            <button onclick="sendChat()">
+                送信
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- CONTROLS -->
+
+    <div id="mediaControls"
+         class="controls hidden">
+
+        <button id="muteBtn"
+                onclick="toggleMute()">
+            🎙 ミュート
+        </button>
+
+        <button id="cameraBtn"
+                onclick="toggleCamera()">
+            📷 カメラOFF
+        </button>
+
+    </div>
+
+    <div class="controls">
+
+        <button class="danger"
+                onclick="endCall()">
+            終了
+        </button>
+
+    </div>
+
+</section>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   GLOBAL STATE
+========================================================= */
+
+var selectedMode = "video";
+
+var role = null;
+
+var pc = null;
+
+var dataChannel = null;
+
+var localStream = null;
+
+var remoteStream = null;
+
+var connected = false;
+
+var muted = false;
+
+var cameraOff = false;
+
+var offerQRParts = [];
+
+var answerQRParts = [];
+
+var offerQRIndex = 0;
+
+var answerQRIndex = 0;
+
+var offerQRCollected = {};
+
+var answerQRCollected = {};
+
+var offerScannerStream = null;
+
+var answerScannerStream = null;
+
+var offerScanTimer = null;
+
+var answerScanTimer = null;
+
+var QR_CHUNK_SIZE = 1200;
+
+
+/* =========================================================
+   LOG
+========================================================= */
+
+function log(message){
+
+    console.log("[Jiffy]", message);
+
+}
+
+
+/* =========================================================
+   MODE
+========================================================= */
+
+function selectMode(mode){
+
+    selectedMode = mode;
+
+    var buttons = document.querySelectorAll(".mode-btn");
+
+    for(var i=0;i<buttons.length;i++){
+
+        buttons[i].classList.remove("selected");
+
+        if(buttons[i].getAttribute("data-mode") === mode){
+            buttons[i].classList.add("selected");
+        }
+
+    }
+
+}
+
+
+function modeName(){
+
+    if(selectedMode === "video"){
+        return "Video — 映像 + 音声";
+    }
+
+    if(selectedMode === "text"){
+        return "Text — テキストのみ";
+    }
+
+    return "Full — 映像 + 音声 + チャット";
+
+}
+
+
+function needsMedia(){
+
+    return selectedMode === "video" ||
+           selectedMode === "full";
+
+}
+
+
+function needsChat(){
+
+    return selectedMode === "text" ||
+           selectedMode === "full";
+
+}
+
+
+/* =========================================================
+   SCREEN
+========================================================= */
+
+function show(id){
+
+    document.getElementById(id).classList.remove("hidden");
+
+}
+
+
+function hide(id){
+
+    document.getElementById(id).classList.add("hidden");
+
+}
+
+
+function goRoleSelect(){
+
+    hide("modeScreen");
+
+    show("roleScreen");
+
+    document.getElementById("roleModeInfo").textContent =
+        "選択中: " + modeName();
+
+}
+
+
+function backToMode(){
+
+    hide("roleScreen");
+
+    show("modeScreen");
+
+}
+
+
+function chooseRole(newRole){
+
+    role = newRole;
+
+    hide("roleScreen");
+
+    show("signalScreen");
+
+    document.getElementById("offerPanel").classList.add("hidden");
+
+    document.getElementById("answerPanel").classList.add("hidden");
+
+    if(role === "offer"){
+
+        document.getElementById("signalTitle").textContent =
+            "SDPを作る";
+
+        document.getElementById("signalStatus").textContent =
+            "Offer側です。";
+
+        show("offerPanel");
+
+        prepareOfferRole();
+
+    }else{
+
+        document.getElementById("signalTitle").textContent =
+            "SDPを受け取る";
+
+        document.getElementById("signalStatus").textContent =
+            "Answer側です。";
+
+        show("answerPanel");
+
+        prepareAnswerRole();
+
+    }
+
+}
+
+
+/* =========================================================
+   MEDIA
+========================================================= */
+
+async function getLocalMedia(){
+
+    if(!needsMedia()){
+        return null;
+    }
+
+    if(localStream){
+        return localStream;
+    }
+
+    log("カメラ・マイク取得中...");
+
+    localStream = await navigator.mediaDevices.getUserMedia({
+        video:true,
+        audio:true
+    });
+
+    document.getElementById("localVideo").srcObject =
+        localStream;
+
+    return localStream;
+
+}
+
+
+/* =========================================================
+   PEER CONNECTION
+========================================================= */
+
+function createPeer(){
+
+    /*
+     * 重要:
+     * 同じpcをOffer側とAnswer側で使い回さない。
+     */
+
+    if(pc){
+        return pc;
+    }
+
+    pc = new RTCPeerConnection({
+        iceServers:[]
+    });
+
+    log("PeerConnection created: " + role);
+
+    pc.oniceconnectionstatechange = function(){
+
+        log("ICE connection: " +
+            pc.iceConnectionState);
+
+        updateConnectionStatus();
+
+    };
+
+
+    pc.onconnectionstatechange = function(){
+
+        log("connectionState: " +
+            pc.connectionState);
+
+        updateConnectionStatus();
+
+        if(pc.connectionState === "connected"){
+
+            connected = true;
+
+            hideSignalingAfterConnected();
+
+        }
+
+    };
+
+
+    pc.onicegatheringstatechange = function(){
+
+        log("ICE gathering: " +
+            pc.iceGatheringState);
+
+    };
+
+
+    pc.onsignalingstatechange = function(){
+
+        log("signalingState: " +
+            pc.signalingState);
+
+    };
+
+
+    pc.ondatachannel = function(event){
+
+        log("Remote DataChannel received");
+
+        dataChannel = event.channel;
+
+        setupChatChannel(dataChannel);
+
+    };
+
+
+    pc.ontrack = function(event){
+
+        log("Remote track received");
+
+        if(!remoteStream){
+
+            remoteStream = new MediaStream();
+
+            document.getElementById("remoteVideo").srcObject =
+                remoteStream;
+
+        }
+
+        remoteStream.addTrack(event.track);
+
+    };
+
+
+    return pc;
+
+}
+
+
+/* =========================================================
+   LOCAL TRACKS
+========================================================= */
+
+function addLocalTracks(){
+
+    if(!localStream){
+        return;
+    }
+
+    var tracks = localStream.getTracks();
+
+    for(var i=0;i<tracks.length;i++){
+
+        pc.addTrack(
+            tracks[i],
+            localStream
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   CHAT
+========================================================= */
+
+function setupChatChannel(channel){
+
+    dataChannel = channel;
+
+    dataChannel.onopen = function(){
+
+        log("DataChannel OPEN");
+
+        addMessage(
+            "接続しました。",
+            "other"
+        );
+
+    };
+
+    dataChannel.onclose = function(){
+
+        log("DataChannel CLOSED");
+
+    };
+
+    dataChannel.onerror = function(event){
+
+        log("DataChannel ERROR");
+
+        console.error(event);
+
+    };
+
+    dataChannel.onmessage = function(event){
+
+        addMessage(
+            event.data,
+            "other"
+        );
+
+    };
+
+}
+
+
+function addMessage(textValue, type){
+
+    var chat =
+        document.getElementById("chat");
+
+    var div =
+        document.createElement("div");
+
+    div.className =
+        "msg " + type;
+
+    div.textContent =
+        textValue;
+
+    chat.appendChild(div);
+
+    chat.scrollTop =
+        chat.scrollHeight;
+
+}
+
+
+function sendChat(){
+
+    var input =
+        document.getElementById("chatInput");
+
+    var textValue =
+        input.value;
+
+    if(!textValue){
+        return;
+    }
+
+    if(!dataChannel ||
+       dataChannel.readyState !== "open"){
+
+        alert("まだ接続されていません。");
+
+        return;
+
+    }
+
+    dataChannel.send(textValue);
+
+    addMessage(
+        textValue,
+        "me"
+    );
+
+    input.value = "";
+
+}
+
+
+/* =========================================================
+   OFFER ROLE
+========================================================= */
+
+function prepareOfferRole(){
+
+    /*
+     * Offer側のPeerConnectionはここで1回だけ作る。
+     */
+
+    createPeer();
+
+}
+
+
+async function createOffer(){
+
+    if(role !== "offer"){
+
+        alert("この端末はOffer側ではありません。");
+
+        return;
+
+    }
+
+    try{
+
+        document.getElementById("signalStatus").textContent =
+            "Offerを作成しています...";
+
+        createPeer();
+
+        if(needsMedia()){
+
+            await getLocalMedia();
+
+            addLocalTracks();
+
+        }
+
+
+        if(needsChat()){
+
+            if(!dataChannel){
+
+                dataChannel =
+                    pc.createDataChannel("chat");
+
+                setupChatChannel(dataChannel);
+
+            }
+
+        }
+
+
+        var offer =
+            await pc.createOffer();
+
+        await pc.setLocalDescription(offer);
+
+        log("Local Offer set");
+
+        /*
+         * ICE gathering完了まで待つ。
+         */
+
+        await waitForICE();
+
+        var finalOffer =
+            pc.localDescription.sdp;
+
+        document.getElementById("offerRaw").value =
+            finalOffer;
+
+        var encoded =
+            utf8ToBase64(finalOffer);
+
+        document.getElementById("offerBase64").value =
+            encoded;
+
+        offerQRParts =
+            makeQRParts(
+                "offer",
+                finalOffer
+            );
+
+        offerQRIndex = 0;
+
+        show("offerResult");
+
+        renderOfferQR();
+
+        document.getElementById("signalStatus").textContent =
+            "Offer作成完了。Answerを待っています。";
+
+        log("Offer作成完了");
+
+        log("signalingState=" +
+            pc.signalingState);
+
+    }catch(error){
+
+        console.error(error);
+
+        showError(
+            "Offer作成失敗:\n" +
+            error.message
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   ANSWER ROLE
+========================================================= */
+
+function prepareAnswerRole(){
+
+    /*
+     * Answer側も最初はPeerConnectionだけ。
+     * Offerを受け取るまでlocal offerを作らない。
+     */
+
+    createPeer();
+
+}
+
+
+async function acceptOfferFromInput(){
+
+    var value =
+        document.getElementById("offerInput").value.trim();
+
+    if(!value){
+
+        alert("OfferのBase64を入力してください。");
+
+        return;
+
+    }
+
+    try{
+
+        var sdp =
+            base64ToUtf8(value);
+
+        await acceptOffer(sdp);
+
+    }catch(error){
+
+        console.error(error);
+
+        showError(
+            "Offer受信失敗:\n" +
+            error.message
+        );
+
+    }
+
+}
+
+
+async function acceptOffer(sdp){
+
+    if(role !== "answer"){
+
+        throw new Error(
+            "現在の役割はAnswer側ではありません。"
+        );
+
+    }
+
+    if(!sdp){
+
+        throw new Error(
+            "Offer SDPが空です。"
+        );
+
+    }
+
+    createPeer();
+
+    log("Remote Offer accepted");
+
+    document.getElementById("signalStatus").textContent =
+        "Offerを受け付けています...";
+
+
+    /*
+     * Answer側なのでここでRemote Offer。
+     */
+
+    await pc.setRemoteDescription({
+        type:"offer",
+        sdp:sdp
+    });
+
+    log("Remote Offer set");
+
+    if(needsMedia()){
+
+        await getLocalMedia();
+
+        addLocalTracks();
+
+    }
+
+
+    var answer =
+        await pc.createAnswer();
+
+    await pc.setLocalDescription(answer);
+
+    log("Local Answer set");
+
+    await waitForICE();
+
+    var finalAnswer =
+        pc.localDescription.sdp;
+
+    document.getElementById("answerRaw").value =
+        finalAnswer;
+
+    var encoded =
+        utf8ToBase64(finalAnswer);
+
+    document.getElementById("answerBase64").value =
+        encoded;
+
+    answerQRParts =
+        makeQRParts(
+            "answer",
+            finalAnswer
+        );
+
+    answerQRIndex = 0;
+
+    show("answerResult");
+
+    renderAnswerQR();
+
+    document.getElementById("signalStatus").textContent =
+        "Answer作成完了。相手に渡してください。";
+
+    log("Answer作成完了");
+
+}
+
+
+/* =========================================================
+   APPLY ANSWER
+========================================================= */
+
+async function applyAnswerFromInput(){
+
+    var value =
+        document.getElementById("answerInput").value.trim();
+
+    if(!value){
+
+        alert("AnswerのBase64を入力してください。");
+
+        return;
+
+    }
+
+    try{
+
+        var sdp =
+            base64ToUtf8(value);
+
+        await applyAnswer(sdp);
+
+    }catch(error){
+
+        console.error(error);
+
+        showError(
+            "Answer適用失敗:\n" +
+            error.message
+        );
+
+    }
+
+}
+
+
+async function applyAnswer(sdp){
+
+    if(role !== "offer"){
+
+        throw new Error(
+            "現在の役割はOffer側ではありません。"
+        );
+
+    }
+
+
+    if(!pc){
+
+        throw new Error(
+            "PeerConnectionがありません。"
+        );
+
+    }
+
+
+    /*
+     * ここが今回の重要部分。
+     *
+     * Offerを作った直後は
+     *
+     * have-local-offer
+     *
+     * でなければならない。
+     */
+
+    if(pc.signalingState !== "have-local-offer"){
+
+        throw new Error(
+            "Answerを適用できる状態ではありません。\n" +
+            "現在の状態: " +
+            pc.signalingState +
+            "\n\n" +
+            "Offer側で作成したPeerConnectionを使用してください。"
+        );
+
+    }
+
+
+    document.getElementById("signalStatus").textContent =
+        "Answerを適用しています...";
+
+    log("Applying remote Answer");
+
+    await pc.setRemoteDescription({
+        type:"answer",
+        sdp:sdp
+    });
+
+    log("Remote Answer set");
+
+    document.getElementById("signalStatus").textContent =
+        "Answer適用完了。接続しています...";
+
+}
+
+
+/* =========================================================
+   ICE
+========================================================= */
+
+function waitForICE(){
+
+    return new Promise(function(resolve){
+
+        if(!pc){
+
+            resolve();
+
+            return;
+
+        }
+
+        if(pc.iceGatheringState === "complete"){
+
+            resolve();
+
+            return;
+
+        }
+
+        var finished = false;
+
+        function done(){
+
+            if(finished){
+                return;
+            }
+
+            finished = true;
+
+            pc.removeEventListener(
+                "icegatheringstatechange",
+                check
+            );
+
+            resolve();
+
+        }
+
+        function check(){
+
+            if(pc.iceGatheringState === "complete"){
+
+                done();
+
+            }
+
+        }
+
+        pc.addEventListener(
+            "icegatheringstatechange",
+            check
+        );
+
+        /*
+         * 念のため30秒。
+         */
+
+        setTimeout(done,30000);
+
+    });
+
+}
+
+
+/* =========================================================
+   BASE64
+========================================================= */
+
+function utf8ToBase64(str){
+
+    var bytes =
+        new TextEncoder().encode(str);
+
+    var binary = "";
+
+    for(var i=0;i<bytes.length;i++){
+
+        binary += String.fromCharCode(
+            bytes[i]
+        );
+
+    }
+
+    return btoa(binary);
+
+}
+
+
+function base64ToUtf8(base64){
+
+    var binary =
+        atob(base64);
+
+    var bytes =
+        new Uint8Array(
+            binary.length
+        );
+
+    for(var i=0;i<binary.length;i++){
+
+        bytes[i] =
+            binary.charCodeAt(i);
+
+    }
+
+    return new TextDecoder().decode(bytes);
+
+}
+
+
+/* =========================================================
+   QR
+========================================================= */
+
+function makeQRParts(type,sdp){
+
+    var encoded =
+        utf8ToBase64(sdp);
+
+    var total =
+        Math.ceil(
+            encoded.length /
+            QR_CHUNK_SIZE
+        );
+
+    var parts = [];
+
+    for(var i=0;i<total;i++){
+
+        var chunk =
+            encoded.substring(
+                i * QR_CHUNK_SIZE,
+                (i + 1) * QR_CHUNK_SIZE
+            );
+
+        parts.push(
+            "JF3|" +
+            type +
+            "|" +
+            i +
+            "|" +
+            total +
+            "|" +
+            chunk
+        );
+
+    }
+
+    return parts;
+
+}
+
+
+function parseQRData(data){
+
+    if(typeof data !== "string"){
+        return null;
+    }
+
+    if(data.indexOf("JF3|") !== 0){
+        return null;
+    }
+
+    var p =
+        data.split("|");
+
+    if(p.length < 5){
+        return null;
+    }
+
+    var type = p[1];
+
+    var index =
+        parseInt(p[2],10);
+
+    var total =
+        parseInt(p[3],10);
+
+    var chunk =
+        p.slice(4).join("|");
+
+    if(isNaN(index) ||
+       isNaN(total)){
+
+        return null;
+
+    }
+
+    return {
+        type:type,
+        index:index,
+        total:total,
+        chunk:chunk
+    };
+
+}
+
+
+function collectPart(storage,part){
+
+    if(!storage[part.index]){
+
+        storage[part.index] =
+            part.chunk;
+
+    }
+
+    var keys =
+        Object.keys(storage);
+
+    if(keys.length < part.total){
+
+        return null;
+
+    }
+
+    var result = "";
+
+    for(var i=0;i<part.total;i++){
+
+        if(typeof storage[i] !== "string"){
+
+            return null;
+
+        }
+
+        result +=
+            storage[i];
+
+    }
+
+    return result;
+
+}
+
+
+/* =========================================================
+   OFFER QR
+========================================================= */
+
+function renderOfferQR(){
+
+    var box =
+        document.getElementById("offerQR");
+
+    box.innerHTML = "";
+
+    if(!offerQRParts.length){
+        return;
+    }
+
+    new QRCode(box,{
+        text:offerQRParts[offerQRIndex],
+        width:280,
+        height:280,
+        correctLevel:QRCode.CorrectLevel.L
+    });
+
+    document.getElementById("offerQRPage").textContent =
+        "QR " +
+        (offerQRIndex + 1) +
+        " / " +
+        offerQRParts.length;
+
+}
+
+
+function nextOfferQR(){
+
+    if(offerQRIndex <
+       offerQRParts.length - 1){
+
+        offerQRIndex++;
+
+        renderOfferQR();
+
+    }
+
+}
+
+
+function prevOfferQR(){
+
+    if(offerQRIndex > 0){
+
+        offerQRIndex--;
+
+        renderOfferQR();
+
+    }
+
+}
+
+
+function copyOfferBase64(){
+
+    copyText("offerBase64");
+
+}
+
+
+/* =========================================================
+   ANSWER QR
+========================================================= */
+
+function renderAnswerQR(){
+
+    var box =
+        document.getElementById("answerQR");
+
+    box.innerHTML = "";
+
+    if(!answerQRParts.length){
+        return;
+    }
+
+    new QRCode(box,{
+        text:answerQRParts[answerQRIndex],
+        width:280,
+        height:280,
+        correctLevel:QRCode.CorrectLevel.L
+    });
+
+    document.getElementById("answerQRPage").textContent =
+        "QR " +
+        (answerQRIndex + 1) +
+        " / " +
+        answerQRParts.length;
+
+}
+
+
+function nextAnswerQR(){
+
+    if(answerQRIndex <
+       answerQRParts.length - 1){
+
+        answerQRIndex++;
+
+        renderAnswerQR();
+
+    }
+
+}
+
+
+function prevAnswerQR(){
+
+    if(answerQRIndex > 0){
+
+        answerQRIndex--;
+
+        renderAnswerQR();
+
+    }
+
+}
+
+
+function copyAnswerBase64(){
+
+    copyText("answerBase64");
+
+}
+
+
+/* =========================================================
+   COPY
+========================================================= */
+
+async function copyText(id){
+
+    var el =
+        document.getElementById(id);
+
+    try{
+
+        await navigator.clipboard.writeText(
+            el.value
+        );
+
+        log(
+            "コピーしました。\n" +
+            el.value.length +
+            "文字"
+        );
+
+    }catch(error){
+
+        el.select();
+
+        document.execCommand("copy");
+
+        log("コピーしました。");
+
+    }
+
+}
+
+
+/* =========================================================
+   OFFER QR SCANNER
+========================================================= */
+
+async function startOfferScanner(){
+
+    try{
+
+        stopOfferScanner();
+
+        offerScannerStream =
+            await navigator.mediaDevices.getUserMedia({
+                video:{
+                    facingMode:{
+                        ideal:"environment"
+                    }
+                },
+                audio:false
+            });
+
+        var video =
+            document.getElementById("scanVideo");
+
+        video.srcObject =
+            offerScannerStream;
+
+        video.classList.remove("hidden");
+
+        await video.play();
+
+        offerQRCollected = {};
+
+        offerScanLoop();
+
+    }catch(error){
+
+        console.error(error);
+
+        alert(
+            "カメラを起動できません。\n" +
+            error.message
+        );
+
+    }
+
+}
+
+
+function stopOfferScanner(){
+
+    if(offerScanTimer){
+
+        cancelAnimationFrame(
+            offerScanTimer
+        );
+
+        offerScanTimer = null;
+
+    }
+
+    if(offerScannerStream){
+
+        var tracks =
+            offerScannerStream.getTracks();
+
+        for(var i=0;i<tracks.length;i++){
+            tracks[i].stop();
+        }
+
+        offerScannerStream = null;
+
+    }
+
+    var video =
+        document.getElementById("scanVideo");
+
+    video.classList.add("hidden");
+
+}
+
+
+function offerScanLoop(){
+
+    var video =
+        document.getElementById("scanVideo");
+
+    if(!offerScannerStream){
+        return;
+    }
+
+    if(video.readyState >= 2){
+
+        var canvas =
+            document.createElement("canvas");
+
+        canvas.width =
+            video.videoWidth;
+
+        canvas.height =
+            video.videoHeight;
+
+        var ctx =
+            canvas.getContext("2d");
+
+        ctx.drawImage(
+            video,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+        var image =
+            ctx.getImageData(
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+        var code =
+            jsQR(
+                image.data,
+                image.width,
+                image.height,
+                {
+                    inversionAttempts:
+                        "attemptBoth"
+                }
+            );
+
+        if(code){
+
+            handleOfferQR(code.data);
+
+        }
+
+    }
+
+    offerScanTimer =
+        requestAnimationFrame(
+            offerScanLoop
+        );
+
+}
+
+
+function handleOfferQR(data){
+
+    var part =
+        parseQRData(data);
+
+    if(!part){
+        return;
+    }
+
+    if(part.type !== "offer"){
+        return;
+    }
+
+    var result =
+        collectPart(
+            offerQRCollected,
+            part
+        );
+
+    log(
+        "Offer QR " +
+        (part.index + 1) +
+        "/" +
+        part.total
+    );
+
+    if(result){
+
+        stopOfferScanner();
+
+        try{
+
+            document.getElementById("offerInput").value =
+                result;
+
+            acceptOfferFromInput();
+
+        }catch(error){
+
+            console.error(error);
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   ANSWER QR SCANNER
+========================================================= */
+
+async function startAnswerScanner(){
+
+    try{
+
+        stopAnswerScanner();
+
+        answerScannerStream =
+            await navigator.mediaDevices.getUserMedia({
+                video:{
+                    facingMode:{
+                        ideal:"environment"
+                    }
+                },
+                audio:false
+            });
+
+        var video =
+            document.getElementById("answerScanVideo");
+
+        video.srcObject =
+            answerScannerStream;
+
+        video.classList.remove("hidden");
+
+        await video.play();
+
+        answerQRCollected = {};
+
+        answerScanLoop();
+
+    }catch(error){
+
+        console.error(error);
+
+        alert(
+            "カメラを起動できません。\n" +
+            error.message
+        );
+
+    }
+
+}
+
+
+function stopAnswerScanner(){
+
+    if(answerScanTimer){
+
+        cancelAnimationFrame(
+            answerScanTimer
+        );
+
+        answerScanTimer = null;
+
+    }
+
+    if(answerScannerStream){
+
+        var tracks =
+            answerScannerStream.getTracks();
+
+        for(var i=0;i<tracks.length;i++){
+            tracks[i].stop();
+        }
+
+        answerScannerStream = null;
+
+    }
+
+    var video =
+        document.getElementById("answerScanVideo");
+
+    video.classList.add("hidden");
+
+}
+
+
+function answerScanLoop(){
+
+    var video =
+        document.getElementById("answerScanVideo");
+
+    if(!answerScannerStream){
+        return;
+    }
+
+    if(video.readyState >= 2){
+
+        var canvas =
+            document.createElement("canvas");
+
+        canvas.width =
+            video.videoWidth;
+
+        canvas.height =
+            video.videoHeight;
+
+        var ctx =
+            canvas.getContext("2d");
+
+        ctx.drawImage(
+            video,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+        var image =
+            ctx.getImageData(
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+        var code =
+            jsQR(
+                image.data,
+                image.width,
+                image.height,
+                {
+                    inversionAttempts:
+                        "attemptBoth"
+                }
+            );
+
+        if(code){
+
+            handleAnswerQR(code.data);
+
+        }
+
+    }
+
+    answerScanTimer =
+        requestAnimationFrame(
+            answerScanLoop
+        );
+
+}
+
+
+function handleAnswerQR(data){
+
+    var part =
+        parseQRData(data);
+
+    if(!part){
+        return;
+    }
+
+    if(part.type !== "answer"){
+        return;
+    }
+
+    var result =
+        collectPart(
+            answerQRCollected,
+            part
+        );
+
+    log(
+        "Answer QR " +
+        (part.index + 1) +
+        "/" +
+        part.total
+    );
+
+    if(result){
+
+        stopAnswerScanner();
+
+        document.getElementById("answerInput").value =
+            result;
+
+        applyAnswerFromInput();
+
+    }
+
+}
+
+
+/* =========================================================
+   CONNECTION UI
+========================================================= */
+
+function updateConnectionStatus(){
+
+    if(!pc){
+        return;
+    }
+
+    var text =
+        "signaling: " +
+        pc.signalingState +
+        "\n" +
+        "ICE: " +
+        pc.iceConnectionState +
+        "\n" +
+        "connection: " +
+        pc.connectionState;
+
+    document.getElementById("connectionStatus").textContent =
+        text;
+
+}
+
+
+function hideSignalingAfterConnected(){
+
+    if(!connected){
+        return;
+    }
+
+    stopOfferScanner();
+
+    stopAnswerScanner();
+
+    hide("signalScreen");
+
+    show("callScreen");
+
+    document.getElementById("callTitle").textContent =
+        modeName();
+
+    document.getElementById("connectionStatus").textContent =
+        "接続しました。";
+
+    if(needsMedia()){
+
+        show("videoArea");
+
+        show("mediaControls");
+
+    }
+
+    if(needsChat()){
+
+        show("chatArea");
+
+    }
+
+}
+
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+function showError(message){
+
+    var status =
+        document.getElementById("signalStatus");
+
+    status.textContent =
+        message;
+
+    status.classList.add("error");
+
+}
+
+
+/* =========================================================
+   MEDIA CONTROLS
+========================================================= */
+
+function toggleMute(){
+
+    if(!localStream){
+        return;
+    }
+
+    muted = !muted;
+
+    var tracks =
+        localStream.getAudioTracks();
+
+    for(var i=0;i<tracks.length;i++){
+
+        tracks[i].enabled =
+            !muted;
+
+    }
+
+    document.getElementById("muteBtn").textContent =
+        muted ?
+        "🎙 ミュート解除" :
+        "🎙 ミュート";
+
+}
+
+
+function toggleCamera(){
+
+    if(!localStream){
+        return;
+    }
+
+    cameraOff =
+        !cameraOff;
+
+    var tracks =
+        localStream.getVideoTracks();
+
+    for(var i=0;i<tracks.length;i++){
+
+        tracks[i].enabled =
+            !cameraOff;
+
+    }
+
+    document.getElementById("cameraBtn").textContent =
+        cameraOff ?
+        "📷 カメラON" :
+        "📷 カメラOFF";
+
+}
+
+
+/* =========================================================
+   END
+========================================================= */
+
+function endCall(){
+
+    stopOfferScanner();
+
+    stopAnswerScanner();
+
+    if(dataChannel){
+
+        try{
+            dataChannel.close();
+        }catch(e){}
+
+        dataChannel = null;
+
+    }
+
+    if(pc){
+
+        try{
+            pc.close();
+        }catch(e){}
+
+        pc = null;
+
+    }
+
+    if(localStream){
+
+        var tracks =
+            localStream.getTracks();
+
+        for(var i=0;i<tracks.length;i++){
+            tracks[i].stop();
+        }
+
+        localStream = null;
+
+    }
+
+    connected = false;
+
+    location.reload();
+
+}
+
+
+/* =========================================================
+   INITIAL
+========================================================= */
+
+window.addEventListener(
+    "load",
+    function(){
+
+        log("Jiffy P2P ready");
+
+        log("モード: " + selectedMode);
+
+        /*
+         * mediaDevicesが存在しない場合の説明
+         */
+
+        if(!navigator.mediaDevices){
+
+            console.warn(
+                "navigator.mediaDevices が利用できません。HTTPSまたはlocalhostで開いてください。"
+            );
+
+        }
+
+    }
+);
+
+</script>
+
+</body>
+</html>
